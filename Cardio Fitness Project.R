@@ -1,9 +1,9 @@
+setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/DSBA/Data")
 
 
 CardioGoodFitness <- read.csv("CardioGoodFitness.csv")
 
 
-attach(CardioGoodFitness)
 dim(CardioGoodFitness)
 names(CardioGoodFitness)
 str(CardioGoodFitness)
@@ -12,8 +12,13 @@ tail(CardioGoodFitness)
 summary(CardioGoodFitness)
 
 #convert from quantitative to qualitative 
+library(plyr)
 CardioGoodFitness$Fitness <- factor(CardioGoodFitness$Fitness, order = F, levels =c("1", "2", "3", "4", "5"))
+CardioGoodFitness$Fitness <- factor(mapvalues(Fitness, from = c("1", "2", "3", "4", "5"), to = c("very unfit", "unfit", "normal", "fit", "very fit")))
 
+summary(CardioGoodFitness)
+
+attach(CardioGoodFitness)
 
 #get Mode function
 getmode <- function(v) {
@@ -24,7 +29,6 @@ getmode <- function(v) {
 
 #product
 getmode(Product)
-
 #Age
 mean(Age)
 median(Age)
@@ -60,6 +64,9 @@ min(Usage)
 max(Usage)
 
 
+#Gender
+getmode(Fitness)
+
 #Income
 mean(Income)
 median(Income)
@@ -81,27 +88,27 @@ max(Miles)
 
 
 
-
+CardioGoodFitness
 
 ############## make one graph for all######################
 # Quantitative
 par(mfrow=c(2,3))
-boxplot(Age, main = "Age", pch=1)
-boxplot(Education, main = "Education", pch=2)
-boxplot(Usage, main = "Usage", pch=3)
-hist(Age, main = "Age", pch=4)
-hist(Education, main = "Education", pch=5)
-hist(Usage, main = "Usage", pch=6)
+boxplot(Age, main = "Age")
+boxplot(Education, main = "Education")
+boxplot(Usage, main = "Usage")
+hist(Age, main = "Age")
+hist(Education, main = "Education")
+hist(Usage, main = "Usage")
 
 par(mfrow=c(2,2))
-boxplot(Income/1000,main = "Income(K)", pch=4)
-hist(Income/1000, main = "Income(K)", pch=1)
-boxplot(Miles, main = "Miles", pch=5)
-hist(Miles, main = "Miles", pch=1)
+boxplot(Income/1000,main = "Income(K)")
+boxplot(Miles, main = "Miles")
+hist(Income/1000, main = "Income(K)")
+hist(Miles, main = "Miles")
 
-
-
+library(ggplot2)
 # catagorical
+par(mfrow=c(2,2))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = Product))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = Gender))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = MaritalStatus))
