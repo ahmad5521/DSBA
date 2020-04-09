@@ -1,23 +1,48 @@
+#=======================================================================
+#
+# Exploratory Data Analysis - CardioFitness
+#
+#=======================================================================
+
+
+
+library(readr)
+library(ggplot2)
+library(?plyr)
+library(?scales)
+
+#setting up working directory
 setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/DSBA/Data")
 
 
+#reading data from csv file to CardioGoodFitness variable
 CardioGoodFitness <- read.csv("CardioGoodFitness.csv")
 
 
+
+
+#Retrieve the dimension of an object.
 dim(CardioGoodFitness)
+#Get the names of an object.
 names(CardioGoodFitness)
+#Display the internal structure of an dataset.
 str(CardioGoodFitness)
-head(CardioGoodFitness)
-tail(CardioGoodFitness)
+#Returns the first 10 rows of the dataset.
+head(CardioGoodFitness, 10)
+#Returns the last 10 rows of the dataset.
+tail(CardioGoodFitness, 10)
+#Return a summary of the dataset variables.
 summary(CardioGoodFitness)
+#check if ther is any NA value in dataset
+anyNA(CardioGoodFitness)
 
 #convert from quantitative to qualitative 
-library(plyr)
 CardioGoodFitness$Fitness <- factor(CardioGoodFitness$Fitness, order = F, levels =c("1", "2", "3", "4", "5"))
 CardioGoodFitness$Fitness <- factor(mapvalues(Fitness, from = c("1", "2", "3", "4", "5"), to = c("very unfit", "unfit", "normal", "fit", "very fit")))
 
 summary(CardioGoodFitness)
 
+#objects in the dataset can be accessed by simply giving their names
 attach(CardioGoodFitness)
 
 #get Mode function
@@ -28,61 +53,104 @@ getmode <- function(v) {
 
 
 #product
+#Mode
 getmode(Product)
+
+
 #Age
+#mean
 mean(Age)
+#median
 median(Age)
+#mode
 getmode(Age)
-#get Q1 Q3 IQR
+#get Q1 Q3
 quantile(Age, c(0.25, 0.75), type = 1)
+#IQR
+unname(quantile(Age, c(0.25, 0.75), type = 1)[2] - quantile(Age, c(0.25, 0.75), type = 1)[1])
+#min value
 min(Age)
+#max value
 max(Age)
 
 
 #Gender
+#mode
 getmode(Gender)
 
 #Education
+#mean
 mean(Education)
+#median
 median(Education)
+#mode
 getmode(Education)
-#get Q1 Q3 IQR
-quantile(Education, c(0.25, 0.75), type = 1)
+#get Q1 Q3
+quantile(Education, c(0.25, 0.75), Education = 1)
+#IQR
+unname(quantile(Education, c(0.25, 0.75), type = 1)[2] - quantile(Education, c(0.25, 0.75), type = 1)[1])
+#min value
 min(Education)
+#max value
 max(Education)
 
+
 #MaritalStatus
+#mode
 getmode(MaritalStatus)
 
 #Usage
+#mean
 mean(Usage)
+#median
 median(Usage)
+#mode
 getmode(Usage)
-#get Q1 Q3 IQR
-quantile(Usage, c(0.25, 0.75), type = 1)
+#get Q1 Q3
+quantile(Usage, c(0.25, 0.75), Usage = 1)
+#IQR
+unname(quantile(Usage, c(0.25, 0.75), type = 1)[2] - quantile(Usage, c(0.25, 0.75), type = 1)[1])
+#min value
 min(Usage)
+#max value
 max(Usage)
 
 
-#Gender
+#Fitness
+#mode
 getmode(Fitness)
 
 #Income
+#mean
 mean(Income)
+#median
 median(Income)
+#mode
 getmode(Income)
-#get Q1 Q3 IQR
-quantile(Income, c(0.25, 0.75), type = 1)
+#get Q1 Q3
+quantile(Income, c(0.25, 0.75), Income = 1)
+#IQR
+unname(quantile(Income, c(0.25, 0.75), type = 1)[2] - quantile(Income, c(0.25, 0.75), type = 1)[1])
+#min value
 min(Income)
+#max value
 max(Income)
 
+
 #Miles
+#mean
 mean(Miles)
+#median
 median(Miles)
+#mode
 getmode(Miles)
-#get Q1 Q3 IQR
+#get Q1 Q3
 quantile(Miles, c(0.25, 0.75), type = 1)
+#IQR
+unname(quantile(Miles, c(0.25, 0.75), type = 1)[2] - quantile(Miles, c(0.25, 0.75), type = 1)[1])
+#min value
 min(Miles)
+#max value
 max(Miles)
 
 
@@ -90,34 +158,67 @@ max(Miles)
 
 CardioGoodFitness
 
-############## make one graph for all######################
+#Univariate Analysis
+
+#graph for all variable variables
 # Quantitative
 par(mfrow=c(2,3))
-boxplot(Age, main = "Age")
-boxplot(Education, main = "Education")
-boxplot(Usage, main = "Usage")
-hist(Age, main = "Age")
-hist(Education, main = "Education")
-hist(Usage, main = "Usage")
+boxplot(Age, main = "Age", col="red"  )
+boxplot(Education, main = "Education", col="green")
+boxplot(Usage, main = "Usage", col="blue" )
+hist(Age, main = "Age", col="red" )
+hist(Education, main = "Education0", col="green")
+hist(Usage, main = "Usage", col="blue" )
 
 par(mfrow=c(2,2))
-boxplot(Income/1000,main = "Income(K)")
-boxplot(Miles, main = "Miles")
-hist(Income/1000, main = "Income(K)")
-hist(Miles, main = "Miles")
+boxplot(Income/1000,main = "Income(K)", col="red")
+boxplot(Miles, main = "Miles", col="green")
+hist(Income/1000, main = "Income(K)", col="red")
+hist(Miles, main = "Miles", col="green")
 
-library(ggplot2)
+
 # catagorical
-par(mfrow=c(2,2))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = Product))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = Gender))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = MaritalStatus))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = Fitness))
 
-#######################################################
 
-# Quantitative
-############# Customer Incoms by Product type################
+
+
+#Bi-Variate Analysis
+# Customer Age by Fitness
+#kernel density plots
+ggplot(CardioGoodFitness,
+       aes(x = Age, #quantitative variable
+           fill = factor(Fitness, #defining x axis a categorical
+                         levels = c("very unfit", "unfit", "normal", "fit", "very fit"),
+                         labels = c("very unfit", "unfit", "normal", "fit", "very fit")))) +
+  geom_density(alpha = 0.2) + #setting transparency of graph to keep overlaps visible
+  labs(fill = "Fitness", # setting title of legend
+       x = "Age)",
+       title = "Customer Age by Fitness")
+
+#jitter and box plots
+ggplot(CardioGoodFitness,
+       aes(x = factor(Fitness, #defining x axis a categorical
+                      labels = c("very unfit", "unfit", "normal", "fit", "very fit")),
+           y = Age/1000,
+           color = Product)) + #specifying that coloring is to be based on drive type
+  geom_boxplot(size=1, #makes the lines thicker
+               outlier.shape = 1, #specifies circles for outliers
+               outlier.color = "black", #makes outliers black
+               outlier.size = 3) + #increases the size of the outlier symbol
+  geom_jitter(alpha = 0.5, #setting transparency of graph
+              width=.2) + #decreases the amount of jitter (.4 is the default)
+  labs(title = "Costomer Age by Fitness",
+       x = "Fitness",
+       y = "age") +
+  theme_minimal() + #setting minimal theme (no background color)
+  theme(legend.position = "none") + #hiding legend
+  coord_flip() #x and y axes are reversed
+
+# Customer Incoms by Product type
 #kernel density plots
 ggplot(CardioGoodFitness,
        aes(x = Income/1000, #quantitative variable
@@ -130,7 +231,6 @@ ggplot(CardioGoodFitness,
      title = "Customer Incoms by Product type")
 
 #jitter and box plots
-library(scales)
 ggplot(CardioGoodFitness,
        aes(x = factor(Product, #defining x axis a categorical
                       labels = c("TM195", "TM498", "TM798")),
@@ -149,7 +249,7 @@ ggplot(CardioGoodFitness,
   theme(legend.position = "none") + #hiding legend
   coord_flip() #x and y axes are reversed
 
-############# Customer Education by Product type################
+#Customer Education by Product type
 #kernel density plots 
 ggplot(CardioGoodFitness,
        aes(x = Education, #quantitative variable
@@ -162,7 +262,6 @@ ggplot(CardioGoodFitness,
        title = "Customer Education by Product type")
 
 #jitter and box plots
-library(scales)
 ggplot(CardioGoodFitness,
        aes(x = factor(Product, #defining x axis a categorical
                       labels = c("TM195", "TM498", "TM798")),
@@ -182,7 +281,7 @@ ggplot(CardioGoodFitness,
   coord_flip() #x and y axes are reversed
 
 
-############# Customer Miles by Product type################
+#Customer Miles by Product type
 #kernel density plots Customer Miles by Product type
 ggplot(CardioGoodFitness,
        aes(x = Miles, #quantitative variable
@@ -195,7 +294,6 @@ ggplot(CardioGoodFitness,
        title = "Customer Miles by Product type")
 
 #jitter and box plots
-library(scales)
 ggplot(CardioGoodFitness,
        aes(x = factor(Product, #defining x axis a categorical
                       labels = c("TM195", "TM498", "TM798")),
@@ -214,40 +312,8 @@ ggplot(CardioGoodFitness,
   theme(legend.position = "none") + #hiding legend
   coord_flip() #x and y axes are reversed
 
-############# Customer Age by Product type################
-#kernel density plots Customer Age by Product type
-ggplot(CardioGoodFitness,
-       aes(x = Age, #quantitative variable
-           fill = factor(Product, #defining x axis a categorical
-                         levels = c("TM195", "TM498", "TM798"),
-                         labels = c("TM195", "TM498", "TM798")))) +
-  geom_density(alpha = 0.2) + #setting transparency of graph to keep overlaps visible
-  labs(fill = "Products", # setting title of legend
-       x = "Age",
-       title = "Customer Age by Product type")
 
-
-library(scales)
-ggplot(CardioGoodFitness,
-       aes(x = factor(Product, #defining x axis a categorical
-                      labels = c("TM195", "TM498", "TM798")),
-           y = Age,
-           color = Product)) + #specifying that coloring is to be based on drive type
-  geom_boxplot(size=1, #makes the lines thicker
-               outlier.shape = 1, #specifies circles for outliers
-               outlier.color = "black", #makes outliers black
-               outlier.size = 3) + #increases the size of the outlier symbol
-  geom_jitter(alpha = 0.5, #setting transparency of graph
-              width=.2) + #decreases the amount of jitter (.4 is the default)
-  labs(title = "Customer Age by Product type",
-       x = "",
-       y = "Age") +
-  theme_minimal() + #setting minimal theme (no background color)
-  theme(legend.position = "none") + #hiding legend
-  coord_flip() #x and y axes are reversed
-
-
-############# Customer Usage by Product type################
+#Customer Usage by Product type
 #kernel density plots Customer Usage by Product type
 ggplot(CardioGoodFitness,
        aes(x = Usage, #quantitative variable
@@ -259,7 +325,7 @@ ggplot(CardioGoodFitness,
        x = "Usage",
        title = "Customer avrage Usage by Product type")
 
-library(scales)
+
 ggplot(CardioGoodFitness,
        aes(x = factor(Product, #defining x axis a categorical
                       labels = c("TM195", "TM498", "TM798")),
@@ -280,8 +346,7 @@ ggplot(CardioGoodFitness,
 
 
 
-# catagorical
-############ Custome Gender by Product type##################
+#Custome Gender by Product type
 # stacked bar chart
 ggplot(CardioGoodFitness,
        aes(x = Gender,
@@ -293,7 +358,7 @@ ggplot(CardioGoodFitness,
        title = "Custome Gender by Product type") +
   geom_bar(position = "stack") #specifying the type of bar chart as stacked
 
-############ Custome Fitness by Product type##################
+#Custome Fitness by Product type
 # stacked bar chart
 ggplot(CardioGoodFitness,
        aes(x = Fitness,
@@ -305,7 +370,7 @@ ggplot(CardioGoodFitness,
        title = "Custome Fitness by Product type") +
   geom_bar(position = "stack") #specifying the type of bar chart as stacked
 
-############ Custome MaritalStatus by Product type##################
+#Custome MaritalStatus by Product type
 # stacked bar chart
 ggplot(CardioGoodFitness,
        aes(x = MaritalStatus,
@@ -316,20 +381,9 @@ ggplot(CardioGoodFitness,
        x = "Marital Status",
        title = "Custome Marital Status by Product type") +
   geom_bar(position = "stack") #specifying the type of bar chart as stacked
-#############################################################
 
-
-
-
-
-
-
-
-
-
-########Relation between Customer Income and Age########
+#Relation between Customer Income and Age
 #scatter plot
-library(ggplot2) #loading the library required for this plot
 ggplot(CardioGoodFitness,aes(x = Income/1000,y = Age)) +
   geom_point(color="cornflowerblue", #setting the colour, size and transparency(alpha) of the points
 size = 2,
@@ -341,10 +395,9 @@ alpha=.8) +
   geom_smooth(method = "lm") # this adds a linear trend line which is useful to summarize the relationship between the two variables
 
 
-########Relation between Customer Income and Education########
+#Relation between Customer Income and Education
 #scatter plot
-library(ggplot2) #loading the library required for this plot
-ggplot(CardioGoodFitness,aes(x = Income/1000,y = Miles)) +
+ggplot(CardioGoodFitness,aes(x = Income/1000,y = Education)) +
   geom_point(color="cornflowerblue", #setting the colour, size and transparency(alpha) of the points
              size = 2,
              alpha=.8) +
@@ -353,3 +406,50 @@ ggplot(CardioGoodFitness,aes(x = Income/1000,y = Miles)) +
        title = "Income(K) vs Education",
        subtitle = "Relation between Customer Income and Education") +
   geom_smooth(method = "lm") # this adds a linear trend line which is useful to summarize the relationship between the two variables
+
+#Relation between Customer Age and Miles
+#scatter plot
+ggplot(CardioGoodFitness,aes(x = Age,y = Miles)) +
+  geom_point(color="cornflowerblue", #setting the colour, size and transparency(alpha) of the points
+             size = 2,
+             alpha=.8) +
+  labs(x = "Age", #specifying the labels of axes and title of plot
+       y = "Miles",
+       title = "Age vs Miles",
+       subtitle = "Relation between Customer Income and Miles") +
+  geom_smooth(method = "lm") # this adds a linear trend line which is useful to summarize the relationship between the two variables
+
+#Relation between Customer Age and Usage
+#scatter plot
+ggplot(CardioGoodFitness,aes(x = Age,y = Usage)) +
+  geom_point(color="cornflowerblue", #setting the colour, size and transparency(alpha) of the points
+             size = 2,
+             alpha=.8) +
+  labs(x = "Age", #specifying the labels of axes and title of plot
+       y = "Usage",
+       title = "Age vs Usage",
+       subtitle = "Relation between Customer Age and Usage") +
+  geom_smooth(method = "lm") # this adds a linear trend line which is useful to summarize the relationship between the two variables
+
+
+#outlier identification
+#Income
+boxplot.stats(CardioGoodFitness$Income)$out 
+
+#Age
+boxplot.stats(CardioGoodFitness$Age)$out 
+
+#Usage
+boxplot.stats(CardioGoodFitness$Usage)$out 
+
+#Education
+boxplot.stats(CardioGoodFitness$Education)$out 
+
+#Miles
+boxplot.stats(CardioGoodFitness$Miles)$out 
+
+#=======================================================================
+#
+# T H E - E N D
+#
+#=======================================================================
