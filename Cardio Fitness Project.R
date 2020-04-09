@@ -3,43 +3,42 @@
 # Exploratory Data Analysis - CardioFitness
 #
 #=======================================================================
-
-
-
+#calling all libraries that we are going to use
 library(readr)
 library(ggplot2)
 library(?plyr)
 library(?scales)
 
 #setting up working directory
-setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/DSBA/Data")
-
+setwd("………../PGP DSBA/DSBA/Data")
 
 #reading data from csv file to CardioGoodFitness variable
 CardioGoodFitness <- read.csv("CardioGoodFitness.csv")
 
-
-
-
 #Retrieve the dimension of an object.
 dim(CardioGoodFitness)
+
 #Get the names of an object.
 names(CardioGoodFitness)
+
 #Display the internal structure of an dataset.
 str(CardioGoodFitness)
+
 #Returns the first 10 rows of the dataset.
 head(CardioGoodFitness, 10)
+
 #Returns the last 10 rows of the dataset.
 tail(CardioGoodFitness, 10)
+
 #Return a summary of the dataset variables.
 summary(CardioGoodFitness)
+
 #check if ther is any NA value in dataset
 anyNA(CardioGoodFitness)
 
 #convert from quantitative to qualitative 
 CardioGoodFitness$Fitness <- factor(CardioGoodFitness$Fitness, order = F, levels =c("1", "2", "3", "4", "5"))
 CardioGoodFitness$Fitness <- factor(mapvalues(Fitness, from = c("1", "2", "3", "4", "5"), to = c("very unfit", "unfit", "normal", "fit", "very fit")))
-
 summary(CardioGoodFitness)
 
 #objects in the dataset can be accessed by simply giving their names
@@ -51,11 +50,10 @@ getmode <- function(v) {
   uniqv[which.max(tabulate(match(v, uniqv)))]
 }
 
-
+# univariate Analysis
 #product
 #Mode
 getmode(Product)
-
 
 #Age
 #mean
@@ -72,7 +70,6 @@ unname(quantile(Age, c(0.25, 0.75), type = 1)[2] - quantile(Age, c(0.25, 0.75), 
 min(Age)
 #max value
 max(Age)
-
 
 #Gender
 #mode
@@ -94,7 +91,6 @@ min(Education)
 #max value
 max(Education)
 
-
 #MaritalStatus
 #mode
 getmode(MaritalStatus)
@@ -114,7 +110,6 @@ unname(quantile(Usage, c(0.25, 0.75), type = 1)[2] - quantile(Usage, c(0.25, 0.7
 min(Usage)
 #max value
 max(Usage)
-
 
 #Fitness
 #mode
@@ -136,7 +131,6 @@ min(Income)
 #max value
 max(Income)
 
-
 #Miles
 #mean
 mean(Miles)
@@ -153,37 +147,28 @@ min(Miles)
 #max value
 max(Miles)
 
-
-
-
-CardioGoodFitness
-
-#Univariate Analysis
-
 #graph for all variable variables
 # Quantitative
 par(mfrow=c(2,3))
-boxplot(Age, main = "Age", col="red"  )
-boxplot(Education, main = "Education", col="green")
-boxplot(Usage, main = "Usage", col="blue" )
-hist(Age, main = "Age", col="red" )
-hist(Education, main = "Education0", col="green")
-hist(Usage, main = "Usage", col="blue" )
+boxplot(Age, main = "Age")
+boxplot(Education, main = "Education")
+boxplot(Usage, main = "Usage")
+hist(Age, main = "Age")
+hist(Education, main = "Education")
+hist(Usage, main = "Usage")
 
 par(mfrow=c(2,2))
-boxplot(Income/1000,main = "Income(K)", col="red")
-boxplot(Miles, main = "Miles", col="green")
-hist(Income/1000, main = "Income(K)", col="red")
-hist(Miles, main = "Miles", col="green")
-
+boxplot(Income/1000,main = "Income(K)")
+boxplot(Miles, main = "Miles")
+hist(Income/1000, main = "Income(K)")
+hist(Miles, main = "Miles")
 
 # catagorical
+par(mfrow=c(2,2))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = Product))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = Gender))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = MaritalStatus))
 ggplot(CardioGoodFitness) + geom_bar(aes(x = Fitness))
-
-
 
 
 #Bi-Variate Analysis
@@ -199,25 +184,6 @@ ggplot(CardioGoodFitness,
        x = "Age)",
        title = "Customer Age by Fitness")
 
-#jitter and box plots
-ggplot(CardioGoodFitness,
-       aes(x = factor(Fitness, #defining x axis a categorical
-                      labels = c("very unfit", "unfit", "normal", "fit", "very fit")),
-           y = Age/1000,
-           color = Product)) + #specifying that coloring is to be based on drive type
-  geom_boxplot(size=1, #makes the lines thicker
-               outlier.shape = 1, #specifies circles for outliers
-               outlier.color = "black", #makes outliers black
-               outlier.size = 3) + #increases the size of the outlier symbol
-  geom_jitter(alpha = 0.5, #setting transparency of graph
-              width=.2) + #decreases the amount of jitter (.4 is the default)
-  labs(title = "Costomer Age by Fitness",
-       x = "Fitness",
-       y = "age") +
-  theme_minimal() + #setting minimal theme (no background color)
-  theme(legend.position = "none") + #hiding legend
-  coord_flip() #x and y axes are reversed
-
 # Customer Incoms by Product type
 #kernel density plots
 ggplot(CardioGoodFitness,
@@ -227,8 +193,8 @@ ggplot(CardioGoodFitness,
                          labels = c("TM195", "TM498", "TM798")))) +
   geom_density(alpha = 0.2) + #setting transparency of graph to keep overlaps visible
   labs(fill = "Products", # setting title of legend
-     x = "Income (K)",
-     title = "Customer Incoms by Product type")
+       x = "Income (K)",
+       title = "Customer Incoms by Product type")
 
 #jitter and box plots
 ggplot(CardioGoodFitness,
@@ -386,8 +352,8 @@ ggplot(CardioGoodFitness,
 #scatter plot
 ggplot(CardioGoodFitness,aes(x = Income/1000,y = Age)) +
   geom_point(color="cornflowerblue", #setting the colour, size and transparency(alpha) of the points
-size = 2,
-alpha=.8) +
+             size = 2,
+             alpha=.8) +
   labs(x = "Income(K)", #specifying the labels of axes and title of plot
        y = "Age",
        title = "Income(K) vs Age",
@@ -431,7 +397,6 @@ ggplot(CardioGoodFitness,aes(x = Age,y = Usage)) +
        subtitle = "Relation between Customer Age and Usage") +
   geom_smooth(method = "lm") # this adds a linear trend line which is useful to summarize the relationship between the two variables
 
-
 #outlier identification
 #Income
 boxplot.stats(CardioGoodFitness$Income)$out 
@@ -453,3 +418,4 @@ boxplot.stats(CardioGoodFitness$Miles)$out
 # T H E - E N D
 #
 #=======================================================================
+
