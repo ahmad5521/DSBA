@@ -6,11 +6,11 @@
 #calling all libraries that we are going to use
 library(readr)
 library(ggplot2)
-library(?plyr)
-library(?scales)
+library(plyr)
+library(scales)
 
 #setting up working directory
-setwd("………../PGP DSBA/DSBA/Data")
+setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/DSBA/Project 1-Cardio Fitness/Data")
 
 #reading data from csv file to CardioGoodFitness variable
 CardioGoodFitness <- read.csv("CardioGoodFitness.csv")
