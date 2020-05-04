@@ -5,8 +5,6 @@
 #=======================================================================
 #calling all libraries that we are going to use
 library(readr)
-library(dplyr)
-library(ggpubr)
 
 
 
@@ -15,7 +13,7 @@ library(ggpubr)
 #=======================================================================
 
 #setting up working directory
-setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/DSBA/Data/Project 2 - Cold Storage")
+setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/Data/Project 2 - Cold Storage")
 
 
 #reading data from csv file to Cold_Storage_Temp_Data variable and view it
@@ -46,7 +44,7 @@ tail(Cold_Storage_Temp_Data, 10)
 #objects in the dataset can be accessed by simply giving their names
 attach(Cold_Storage_Temp_Data)
 
-#findoing mean cold storage temperature for summer,winter and Rainy Season
+#Finding mean cold storage temperature for summer,winter and Rainy Season
 aggregate(x = Temperature,                # Specify data column
           by = list(Season),              # Specify group indicator
           FUN = mean)                     # Specify function (i.e. mean)
