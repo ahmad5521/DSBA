@@ -10,7 +10,7 @@ library(plyr)
 library(scales)
 
 #setting up working directory
-setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/DSBA/Project 1-Cardio Fitness/Data")
+setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/Data/Project 1-Cardio Fitness")
 
 #reading data from csv file to CardioGoodFitness variable
 CardioGoodFitness <- read.csv("CardioGoodFitness.csv")
