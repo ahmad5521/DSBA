@@ -10,6 +10,11 @@ library(ggplot2)# data visualisation
 library(gridExtra) # arrange multiple grid-based plots on a page
 library(factoextra) # extract and visualize the results of multivariate data analysis
 library(NbClust) # to find optimal number of clusters
+library(caTools)
+library(rpart)
+library(rpart.plot)
+library(tidyverse)
+library(cluster)
 
 #setting up working directory
 setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/Data/Project 3 - Thera Bank Case Study")
@@ -54,12 +59,12 @@ Thera_Bank_Personal_Loan_Modelling_Dataset[is.na(Thera_Bank_Personal_Loan_Modell
 #Converting variable tipes from int to logic and factor
 Thera_Bank_Personal_Loan_Modelling_Dataset$ZIPCode = as.factor(Thera_Bank_Personal_Loan_Modelling_Dataset$ZIPCode)
 Thera_Bank_Personal_Loan_Modelling_Dataset$Education = as.factor(Thera_Bank_Personal_Loan_Modelling_Dataset$Education)
-Thera_Bank_Personal_Loan_Modelling_Dataset$PersonalLoan = as.logical(Thera_Bank_Personal_Loan_Modelling_Dataset$PersonalLoan)
+Thera_Bank_Personal_Loan_Modelling_Dataset$PersonalLoan = as.factor(Thera_Bank_Personal_Loan_Modelling_Dataset$PersonalLoan)
 
-Thera_Bank_Personal_Loan_Modelling_Dataset$SecuritiesAccount = as.logical(Thera_Bank_Personal_Loan_Modelling_Dataset$SecuritiesAccount)
-Thera_Bank_Personal_Loan_Modelling_Dataset$CDAccount = as.logical(Thera_Bank_Personal_Loan_Modelling_Dataset$CDAccount)
-Thera_Bank_Personal_Loan_Modelling_Dataset$Online = as.logical(Thera_Bank_Personal_Loan_Modelling_Dataset$Online)
-Thera_Bank_Personal_Loan_Modelling_Dataset$CreditCard = as.logical(Thera_Bank_Personal_Loan_Modelling_Dataset$CreditCard)
+Thera_Bank_Personal_Loan_Modelling_Dataset$SecuritiesAccount = as.factor(Thera_Bank_Personal_Loan_Modelling_Dataset$SecuritiesAccount)
+Thera_Bank_Personal_Loan_Modelling_Dataset$CDAccount = as.factor(Thera_Bank_Personal_Loan_Modelling_Dataset$CDAccount)
+Thera_Bank_Personal_Loan_Modelling_Dataset$Online = as.factor(Thera_Bank_Personal_Loan_Modelling_Dataset$Online)
+Thera_Bank_Personal_Loan_Modelling_Dataset$CreditCard = as.factor(Thera_Bank_Personal_Loan_Modelling_Dataset$CreditCard)
 
 #attaching varioable names
 attach(Thera_Bank_Personal_Loan_Modelling_Dataset)
@@ -133,26 +138,6 @@ ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,
   theme(legend.position = "none") + #hiding legend
   coord_flip() #x and y axes are reversed
 
-
-#jitter and box plots
-ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,
-       aes(x = factor(Education, #defining x axis a categorical
-                      labels = c("1", "2", "3")),
-           y = Income,
-           color = Education)) + #specifying that coloring is to be based on drive type
-  geom_boxplot(size=1, #makes the lines thicker
-               outlier.shape = 1, #specifies circles for outliers
-               outlier.color = "black", #makes outliers black
-               outlier.size = 3) + #increases the size of the outlier symbol
-  geom_jitter(alpha = 0.5, #setting transparency of graph
-              width=.2) + #decreases the amount of jitter (.4 is the default)
-  labs(title = "Costomer Income by Education",
-       x = "",
-       y = "Income (k)") +
-  theme_minimal() + #setting minimal theme (no background color)
-  theme(legend.position = "none") + #hiding legend
-  coord_flip() #x and y axes are reversed
-
 #scatter plot
 ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,aes(x = Income, y = Age)) +
   geom_point(color="cornflowerblue", #setting the colour, size and transparency(alpha) of the points
@@ -202,8 +187,8 @@ ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,aes(x = Income, y = Mortgage))
 ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,
        aes(x = CreditCard,
            fill = factor(PersonalLoan,
-                         levels = c("TRUE", "FALSE"),
-                         labels = c("TRUE", "FALSE")))) +
+                         levels = c("0", "1"),
+                         labels = c("0", "1")))) +
   labs(fill = "PersonalLoan", # setting title of legend
        x = "CreditCard",
        title = "CreditCard by PersonalLoan") +
@@ -213,8 +198,8 @@ ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,
 ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,
        aes(x = SecuritiesAccount,
            fill = factor(PersonalLoan,
-                         levels = c("TRUE", "FALSE"),
-                         labels = c("TRUE", "FALSE")))) +
+                         levels = c("0", "1"),
+                         labels = c("0", "1")))) +
   labs(fill = "PersonalLoan", # setting title of legend
        x = "SecuritiesAccount",
        title = "SecuritiesAccount by PersonalLoan") +
@@ -225,32 +210,75 @@ ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,
 #=======================================================================
 #2.1 Apply Clustering algorithm < type, rationale>
 
-library(tidyverse)
-library(cluster)
-library(Nbclust)
 
-Thera_Bank_Personal_Loan_Modelling_Dataset.scaled = scale(Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7))
-seed = 12
+
+
+
+
+
+
+#=========================kmeans=========================
+Thera_Bank_Personal_Loan_Modelling_Dataset.scaled = scale(
+  Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7))
+seed = 1000
+#finding best k
 set.seed(seed)
-clus = kmeans(x=Thera_Bank_Personal_Loan_Modelling_Dataset.scaled, centers = 4, nstart = 5)
-clusplot(Thera_Bank_Personal_Loan_Modelling_Dataset.scaled,clus$cluster, color = T, shode = T, label = 2, lines = 1)
-
-totWss = rep(5)
-for(k in 1:5){
-  set.seed(seed)
-  clus = kmeans(x=Thera_Bank_Personal_Loan_Modelling_Dataset.scaled, centers = k, nstart = 5)
-  totWss[k] = clus$tot.withinss
-}
-print(totWss)
-plot(c(1:5), totWss, type = "b")
-
-set.seed(seed)
-nc = NbClust(Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7), min.nc = 2, max.nc = 5, method = "kmeans")
-
-
-
+nc = NbClust(Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7)
+             , min.nc = 2, max.nc = 5, method = "kmeans")
+#it shows that the best value of k is 3
 clus = kmeans(x=Thera_Bank_Personal_Loan_Modelling_Dataset.scaled, centers = 3, nstart = 5)
 clusplot(Thera_Bank_Personal_Loan_Modelling_Dataset.scaled,clus$cluster, color = T, shode = T, label = 1, lines = 1)
+
+
+
+#3.1 Applying CART <plot the tree>
+#===========================CART======================================
+split <- sample.split(Thera_Bank_Personal_Loan_Modelling_Dataset[-1], SplitRatio = 0.7)
+train <- subset(Thera_Bank_Personal_Loan_Modelling_Dataset, split == TRUE)
+test <- subset( Thera_Bank_Personal_Loan_Modelling_Dataset, split == FALSE)
+
+seed = 1000
+set.seed(seed)
+
+# Create a CART model
+tree = rpart(PersonalLoan ~ ., data = select(train, -1,-5), method = "class", cp=0, minbucket=3)
+prp(tree)
+
+
+
+#insiets
+#https://medium.com/analytics-vidhya/a-guide-to-machine-learning-in-r-for-beginners-decision-trees-c24dfd490abb
+library(randomForest)
+require(caTools)
+
+split <- sample.split(Thera_Bank_Personal_Loan_Modelling_Dataset[-1], SplitRatio = 0.7)
+train <- subset(Thera_Bank_Personal_Loan_Modelling_Dataset, split == TRUE)
+test <- subset( Thera_Bank_Personal_Loan_Modelling_Dataset, split == FALSE)
+
+
+
+rf <- randomForest(PersonalLoan ~ ., data=select(train, -1,-5), ntree = 501, mtry = 3, nodesize = 10, importance = TRUE)
+rf
+
+
+
+pred = predict(rf, newdata=test[,-10])
+str(test[,10])
+cm = table(test[,10], pred)
+#3.1 Applying Random forest
+#===========================Random forest================================
+
+
+
+
+
+
+
+
+
+
+
+
 
 
  #=======================================================================
