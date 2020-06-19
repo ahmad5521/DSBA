@@ -29,6 +29,12 @@ setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/Data/Project 3 - Thera Bank Case Study
 #reading data from csv file to Thera_Bank_Personal_Loan_Modelling_Dataset variable and view it
 Thera_Bank_Personal_Loan_Modelling_Dataset <- read_excel("Thera Bank_Personal_Loan_Modelling-dataset.xlsx", sheet = 2)
 
+
+#fexing negative value
+Thera_Bank_Personal_Loan_Modelling_Dataset$`Experience (in years)`[ Thera_Bank_Personal_Loan_Modelling_Dataset$`Experience (in years)`<0]
+a = abs(Thera_Bank_Personal_Loan_Modelling_Dataset$`Experience (in years)`)
+Thera_Bank_Personal_Loan_Modelling_Dataset$`Experience (in years)` = a
+
 # fix spaces in column names
 spaceless <- function(x) {colnames(x) <- gsub(" ", "", colnames(x));x}
 Thera_Bank_Personal_Loan_Modelling_Dataset <- spaceless(Thera_Bank_Personal_Loan_Modelling_Dataset)
@@ -53,6 +59,7 @@ anyNA(Familymembers)
 anyNA(CCAvg)            
 anyNA(Education)        
 anyNA(Mortgage)
+
 anyNA(PersonalLoan)     
 anyNA(SecuritiesAccount)
 anyNA(CDAccount)
@@ -211,12 +218,23 @@ ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,
        title = "SecuritiesAccount by PersonalLoan") +
   geom_bar(position = "stack") #specifying the type of bar chart as stacked
 
+# stacked bar chart
+ggplot(Thera_Bank_Personal_Loan_Modelling_Dataset,
+       aes(x = Online,
+           fill = factor(PersonalLoan,
+                         levels = c("0", "1"),
+                         labels = c("0", "1")))) +
+  labs(fill = "PersonalLoan", # setting title of legend
+       x = "online",
+       title = "Online by PersonalLoan") +
+  geom_bar(position = "stack") #specifying the type of bar chart as stacked
+
 
 
 #=======================================================================
 #2.1 Apply Clustering algorithm < type, rationale>
 Thera_Bank_Personal_Loan_Modelling_Dataset.scaled = scale(
-  Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7))
+  Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7, 8, 8))
 
 #Calculate Euclidean Distance between data points
 eucDistMatrix <- dist(x=Thera_Bank_Personal_Loan_Modelling_Dataset.scaled, method = "euclidean")
@@ -245,9 +263,9 @@ h_cluster_euc_avg <- hclust(eucDistMatrix, method = 'average')
 plot(h_cluster_euc_avg, 
      hang = -1, col = 'red')
 
-manhDistMatrix <- dist(x=clg_data[, -1], method = "manhattan")
+manhDistMatrix <- dist(x=Thera_Bank_Personal_Loan_Modelling_Dataset.scaled, method = "manhattan")
 h_cluster_manh_comp <- hclust(manhDistMatrix, method = 'complete')
-plot(h_cluster_manh_comp, labels = as.character(clg_data$Engg_College), 
+plot(h_cluster_manh_comp, 
      hang = -1, col = 'blue')
 
 
@@ -255,22 +273,18 @@ plot(h_cluster_manh_comp, labels = as.character(clg_data$Engg_College),
 
 # Add cluster membership to original dataset
 cluster_name <- cutree(h_cluster, k = 3)
-clg_data_hclusters <- cbind(clg_data,cluster_name)
+clg_data_hclusters <- cbind(Thera_Bank_Personal_Loan_Modelling_Dataset.scaled,cluster_name)
 
 
 # Visualise the clusters in two dimensions
-h_clust_viz_3 <- fviz_cluster(list(data = clg_data_hclusters[, -c(1,7)], 
-                                   cluster = clg_data_hclusters[, 7])) + 
+h_clust_viz_3 <- fviz_cluster(list(data = Thera_Bank_Personal_Loan_Modelling_Dataset.scaled, 
+                                   cluster = clg_data_hclusters[, 6])) + 
   ggtitle("hierarchical 3")
 h_clust_viz_3
 
 
-# Number of members in each cluster
-View(clg_data_hclusters[order(clg_data_hclusters$cluster_name),])
-table(clg_data_hclusters$cluster_name)
-
 # Observe the differences between identified clusters
-aggr_mean <- aggregate(clg_data[, -1], list(cluster_name), mean)
+aggr_mean <- aggregate(Thera_Bank_Personal_Loan_Modelling_Dataset.scaled, list(cluster_name), mean)
 
 
 # Create cluster profiles
@@ -282,32 +296,14 @@ View(hcluster.profile)
 hcluster.profile
 
 
-# Insights ----------------------------------------------------------------
-
-# ** Cluster 1 has 6 colleges that have high mean ratings for all performance
-# ** metrics and they charge medium high fees. These are probably the Tier 1 
-# ** engineering colleges
-# **
-# ** Cluster 2 colleges have medium quality teaching, average placements, 
-# ** internships and infrastructure but farily high fees. These  are the
-# ** Tier 2 engineering colleges
-# ** 
-# ** Cluster 3 colleges fare badly in all the areas as compared to their
-# ** counterparts, These can be called Tier 3 engineering colleges.
-
-
-
-
-
-
 
 #=========================kmeans=========================
 Thera_Bank_Personal_Loan_Modelling_Dataset.scaled = scale(
-  Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7))
+  Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7, 8, 8))
 seed = 1000
 #finding best k
 set.seed(seed)
-nc = NbClust(Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7)
+nc = NbClust(Thera_Bank_Personal_Loan_Modelling_Dataset %>% select(2, 3, 4, 6, 7, 8)
              , min.nc = 2, max.nc = 5, method = "kmeans")
 #it shows that the best value of k is 3
 clus = kmeans(x=Thera_Bank_Personal_Loan_Modelling_Dataset.scaled, centers = 3, nstart = 5)
@@ -344,7 +340,7 @@ cart_model1
 #The cost complexity table can be obtained using the printcp or plotcp functions
 printcp(cart_model1)
 plotcp(cart_model1)
-# The unncessarily complex tree above can be pruned using a cost complexity threshold. 
+  # The unncessarily complex tree above can be pruned using a cost complexity threshold. 
 # Using a complexity threshold of 0.07 gives us a relatively simpler tree.
 cart_model2 = prune(cart_model1, cp= 0.07 ,"CP")
 printcp(cart_model2)
@@ -491,6 +487,7 @@ varImpPlot(rf_model2, sort = TRUE)
 
 # We will compare all the 4 models that we created earlier - rf_model1, rf_model2, cart_model1, cart_model2
 # Predict PersonalLoan class and probability for all 4 models
+
 # Predict on test data using cart_model1
 cart_model1_predict_class = predict(cart_model1, test, type = 'class')
 cart_model1_predict_score = predict(cart_model1, test, type = 'prob')
@@ -566,7 +563,6 @@ precision_rf_model1 = conf_mat_rf_model1[2,2] / sum(conf_mat_rf_model1[,'1'])
 precision_rf_model2 = conf_mat_rf_model2[2,2] / sum(conf_mat_rf_model2[,'1'])
 
 # KS
-
 # Using library ROCR functions prediction and performance
 pred_cart_model1 = prediction(cart_model1_predict_score[, 2], test$PersonalLoan) 
 perf_cart_model1 = performance(pred_cart_model1,"tpr","fpr")
@@ -584,9 +580,7 @@ pred_rf_model2 = prediction(rf_model2_predict_score[, 2], test$PersonalLoan)
 perf_rf_model2 = performance(pred_rf_model2,"tpr","fpr")
 ks_rf_model2 = max(attr(perf_rf_model2,'y.values')[[1]] - attr(perf_rf_model2,'x.values')[[1]])
 
-
 # AUC
-
 # Using library ROCR
 auc_cart_model1 = performance(pred_cart_model1, measure = "auc")
 auc_cart_model1 = auc_cart_model1@y.values[[1]]
@@ -623,14 +617,21 @@ concordance_rf_model2 = Concordance(actuals = ifelse(test$PersonalLoan == '1', 1
 
 # Comparing models
 
+cart_model1_metrics = c(accuracy_cart_model1, sensitivity_cart_model1, specificity_cart_model1, 
+                        precision_cart_model1, ks_cart_model1, auc_cart_model1, gini_cart_model1, 
+                        concordance_cart_model1$Concordance)
 
-cart_model1_metrics = c(accuracy_cart_model1, sensitivity_cart_model1, specificity_cart_model1, precision_cart_model1, ks_cart_model1, auc_cart_model1, gini_cart_model1, concordance_cart_model1$Concordance)
+cart_model2_metrics = c(accuracy_cart_model2, sensitivity_cart_model2, specificity_cart_model2, 
+                        precision_cart_model2, ks_cart_model2, auc_cart_model2, gini_cart_model2, 
+                        concordance_cart_model2$Concordance)
 
-cart_model2_metrics = c(accuracy_cart_model2, sensitivity_cart_model2, specificity_cart_model2, precision_cart_model2, ks_cart_model2, auc_cart_model2, gini_cart_model2, concordance_cart_model2$Concordance)
+rf_model1_metrics = c(accuracy_rf_model1, sensitivity_rf_model1, specificity_rf_model1,
+                      precision_rf_model1, ks_rf_model1, auc_rf_model1, gini_rf_model1, 
+                      concordance_rf_model1$Concordance)
 
-rf_model1_metrics = c(accuracy_rf_model1, sensitivity_rf_model1, specificity_rf_model1, precision_rf_model1, ks_rf_model1, auc_rf_model1, gini_rf_model1, concordance_rf_model1$Concordance)
-
-rf_model2_metrics = c(accuracy_rf_model2, sensitivity_rf_model2, specificity_rf_model2, precision_rf_model2, ks_rf_model2, auc_rf_model2, gini_rf_model2, concordance_rf_model2$Concordance)
+rf_model2_metrics = c(accuracy_rf_model2, sensitivity_rf_model2, specificity_rf_model2, 
+                      precision_rf_model2, ks_rf_model2, auc_rf_model2, gini_rf_model2, 
+                      concordance_rf_model2$Concordance)
 
 comparison_table = data.frame(cart_model1_metrics, cart_model2_metrics, rf_model1_metrics, rf_model2_metrics)
 
