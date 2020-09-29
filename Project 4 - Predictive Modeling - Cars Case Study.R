@@ -240,18 +240,22 @@ ggplot(Cars,
 
 # we are convering dependent varible to 1 and 0 where 1 indicate Cars and 0 indicates others
 Cars$BiTransport = ifelse(Transport == "Car",1,0)
+Cars$BiTransport = as.factor(Cars$BiTransport)
+summary(Cars)
 
-set.seed(300)
 library(caTools)
+
+# SEPERATE DATE TO BE TOW PARS ONE FOR TRAIN AND OTHER FOR TEST 
+set.seed(300)
 spl = sample.split(Cars$BiTransport, SplitRatio=0.75)
 train = subset(Cars, spl ==T)
 test = subset(Cars, spl==F)
 
 
 
-#KNN
-
 library(class)
+
+#KNN
 set.seed(1)
 knnmod <- caret::train(Transport ~ .,
                        method     = "knn",
@@ -285,12 +289,10 @@ output
 
 
 
-
-#naiveBayes
-
 library(e1071) # to build a naive bayes model
 library(ROCR)
 
+#naiveBayes
 model<-naiveBayes(BiTransport~.,data=train)
 model
 
@@ -344,31 +346,20 @@ GINI_NB
 
 
 
+library(MASS)
+library(caret)
 
 # Logistic Regression
-
-
 ## Check split consistency
 prop.table(table(train$BiTransport))
 prop.table(table(test$BiTransport))
 prop.table(table(Cars$BiTransport))
-
-
-
-
-
 LRmodel = glm(BiTransport~ ., data = train, family= binomial)
 summary(LRmodel)
 
-library(MASS)
 log_model = stepAIC(LRmodel, direction = "both",k=5) #loosely speaking K=5, represents (P < 0.02)
 summary(log_model)
-
-
-
-library(caret)
 varImp(log_model)
-
 # convert to data frame
 l = data.frame(varImp(log_model))
 l <- cbind(newColName = rownames(l), l)
@@ -377,11 +368,8 @@ rownames(l) <- 1:nrow(l)
 # soritng the imprtance of varaible 
 l[with(l, order(-Overall)), ]
 
-
-# 
 exp(0.0296)
 P = 0.49
-
 
 # prediction on test dataset
 predTrain = predict(log_model, newdata= train, type="response")
@@ -390,7 +378,6 @@ tb
 print('accuracy is ')
 sum(diag(tb))/sum(tb)
 
-
 # prediction on test dataset
 predTest = predict(log_model, newdata= test, type="response")
 tb = table(predTest >0.50,test$BiTransport)
@@ -398,31 +385,21 @@ tb
 print('accuracy is ')
 sum(diag(tb))/sum(tb)
 
-
-
 #par(mfrow=c(1,2))
 p0 <- prediction(predTrain,train$BiTransport)
 p1 <- performance(p0, "tpr", "fpr")
-plot(p1, main = "ROC Curve" ,colorize = TRUE)                        ## logistic regression model
+plot(p1, main = "ROC Curve" ,colorize = TRUE) ## logistic regression model
 AUC  <- as.numeric(performance(p0, "auc")@y.values) ## AUC  = 0.9083176
 gini <- 2*AUC - 1                                   ## gini = 0.8166352
 KS   <- max(p1@y.values[[1]] - p1@x.values[[1]])    ## KS   = 0.6511416
-
-
 print('AUC')
 AUC
-
 print('KS')
 KS
-
-
 p0 = prediction(predTrain,train$BiTransport) 
 p1 = performance(p0,"tpr","fpr")
 plot(p1, main = "ROC Curve" ,colorize = TRUE)
-
 str(p1)
-
-# perf_rf_model2 is an S4 class. For S4 classes we use @ to access the slots (similar to how we use $)
 
 cutoffs <-
   data.frame(
@@ -433,114 +410,64 @@ cutoffs <-
 
 head(cutoffs)
 View(cutoffs)
-
 cutoffs <- cutoffs[order(cutoffs$tpr, decreasing=TRUE),]
 head(subset(cutoffs, fpr < 0.2))
-
-
 class_prediction_with_new_cutoff = ifelse(predTrain>= 0.24, 1, 0)
 new_confusion_matrix = table(train$BiTransport,class_prediction_with_new_cutoff )
 new_confusion_matrix
-
 new_accuracy = sum(diag(new_confusion_matrix)) / sum(new_confusion_matrix)
 new_accuracy
-
 new_sensitivity = new_confusion_matrix[2,2] / sum(new_confusion_matrix[2, ])
 new_sensitivity
-
 new_specificity = new_confusion_matrix[1,1] / sum(new_confusion_matrix[1, ])
 new_specificity
-
 class_prediction_with_new_cutoff = ifelse(predTest>= 0.24, 1, 0)
 new_confusion_matrix = table(test$BiTransport ,class_prediction_with_new_cutoff)
 new_confusion_matrix
-
 new_accuracy = sum(diag(new_confusion_matrix)) / sum(new_confusion_matrix)
 new_accuracy
-
 new_sensitivity = new_confusion_matrix[2,2] / sum(new_confusion_matrix[2, ])
 new_sensitivity
-
 new_specificity = new_confusion_matrix[1,1] / sum(new_confusion_matrix[1, ])
 new_specificity
 
 
 
+library(class)
+library(e1071)
+library(gbm)          # basic implementation using AdaBoost
+library(xgboost)      # a faster implementation of a gbm#loading a few libraries
+library(caret)        # an aggregator package for performing many machine learning models
+library(ipred)
+library(rpart)
+library(gbm)
 
-
-
-library(readr)
-library(ggplot2) 
-
-#setting up working directory
-setwd("C:/Users/ahmasiri/Desktop/PGP DSBA/Data/Project 4 - Cars Case Study")
-#reading data from csv file to Cars variable and view it
-Cars <- read.csv("Cars-dataset.csv")
 attach(Cars)
-
 
 #logistic regression
 german_logistic <- glm(Transport~., data=train, family=binomial(link="logit"))
-test$log.pred<-predict(german_logistic, test[1:8], type="response")
-#in the above line of code we have noted the results of the above two lines in the column called log.pred
+test$log.pred<-predict(german_logistic, test, type="response")
 table(test$Transport,test$log.pred>0.5)
-#we are comapring the predicted values and given values. Anything above 0.5 will be a yes from the above code
-
-
-#The above resut says that for our not default we predicted 7106 correctly.
-#But when for the ones which did default we only predicted it correctly just for 12 times 
-#that it was going to default. The above confusion matrix might give us a very high 
-#probability of us being correct but we have to remember that we predicted most of 
-#the minority class wrongly.
-
-
 
 #knn
 #knn compare
-library(class)
 knn_fit<- knn(train = train[,c(3,4,8)], test = test[,c(3,4,8)], cl= train[,8],k = 3,prob=TRUE)
-#here were have predicted the  minority class all wrong. But we still 
-#do have a high probability of being correct.
-#Is it a good model though?
 table(test[,9],knn_fit)
-#KNN in this case is not a good algorithm to use in this case.
-
-
 
 #naive bayes
-library(e1071)
 nb_gd<-naiveBayes(x=train[,c(3,4,8)], y=as.factor(train[,9]))
-#do make sure that your dependent variable is a factor
 pred_nb<-predict(nb_gd,newdata = test[,c(3,4,8)])
 table(test[,9],pred_nb)
-#Here, we see that the Naive-Bayes algorithm definitely works better than KNN.
-
-#loading a few libraries
-library(gbm)          # basic implementation using AdaBoost
-library(xgboost)      # a faster implementation of a gbm
-library(caret)        # an aggregator package for performing many machine learning models
-
 
 ## Bagging
-
-library(ipred)
-library(rpart)
-
-#we can modify the maxdepth and minsplit if needed
-#r doc, https://www.rdocumentation.org/packages/ipred/versions/0.4-0/topics/bagging
 Cars.bagging <- bagging(Transport ~.,
                         data=train,
                         control=rpart.control(maxdepth=5, minsplit=4))
 
 test$pred.Transport <- predict(Cars.bagging, test)
-
 table(test$Transport,test$pred.Transport)
 
-
-
 #Boosting
-
-library(gbm)
 gbm.fit <- gbm(
   formula = Transport ~ .,
   data = train,
@@ -551,11 +478,8 @@ gbm.fit <- gbm(
   n.cores = NULL, # will use all cores by default
   verbose = FALSE#after every tree/stump it is going to show the error and how it is changing
 )  
-
-
 test$pred.Transport <- predict(gbm.fit, test,type="response" )
 #we have to put type="response" just like in logistic regression else we will have log odds
-
 table(test$Transport,head(test$pred.Transport,105))
 
 
